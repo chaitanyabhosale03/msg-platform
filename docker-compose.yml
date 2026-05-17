@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  relay:
+    build:
+      context: ./relay-server
+      dockerfile: Dockerfile
+    container_name: msg-relay
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    environment:
+      - RUST_LOG=info
+      - RELAY_HOST=0.0.0.0
+      - RELAY_PORT=8080
+      - RELAY_GRPC_PORT=9000
+      - DATABASE_URL=postgresql://msg_user:secure_password_change_me@postgres:5432/msg_platform
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./relay-server:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - msg-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: msg-db
+    environment:
+      POSTGRES_USER: msg_user
+      POSTGRES_PASSWORD: secure_password_change_me
+      POSTGRES_DB: msg_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - msg-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: msg-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - msg-network
+
+volumes:
+  postgres_data:
+
+networks:
+  msg-network:
+    driver: bridge
