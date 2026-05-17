@@ -59,9 +59,9 @@ impl KeyPair {
         sodiumoxide::init().ok();
 
         let pk = SodiumPubKey::from_slice(&recipient_pk.pk_box)
-            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?;
         let sk = SodiumSecKey::from_slice(&self.private.sk_box)
-            .ok_or_else(|| anyhow::anyhow!("Invalid secret key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid secret key"))?;
 
         let ciphertext = box_::seal(plaintext, &pk, &sk);
         Ok(ciphertext)
@@ -72,12 +72,12 @@ impl KeyPair {
         sodiumoxide::init().ok();
 
         let pk = SodiumPubKey::from_slice(&sender_pk.pk_box)
-            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?;
         let sk = SodiumSecKey::from_slice(&self.private.sk_box)
-            .ok_or_else(|| anyhow::anyhow!("Invalid secret key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid secret key"))?;
 
         let plaintext = box_::open(ciphertext, &pk, &sk)
-            .map_err(|_| anyhow::anyhow!("Decryption failed"))?
+            .map_err(|_| anyhow::anyhow!("Decryption failed"))?;
         Ok(plaintext)
     }
 
@@ -86,7 +86,7 @@ impl KeyPair {
         sodiumoxide::init().ok();
 
         let sk = SignSecKey::from_slice(&self.private.sk_sign)
-            .ok_or_else(|| anyhow::anyhow!("Invalid signing key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid signing key"))?;
 
         Ok(sign::sign(message, &sk).0.to_vec())
     }
@@ -96,10 +96,10 @@ impl KeyPair {
         sodiumoxide::init().ok();
 
         let pk = SignPubKey::from_slice(&sender_pk.pk_sign)
-            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid public key"))?;
 
         let plaintext = sign::verify(signed_message, &pk)
-            .map_err(|_| anyhow::anyhow!("Signature verification failed"))?
+            .map_err(|_| anyhow::anyhow!("Signature verification failed"))?;
         Ok(plaintext)
     }
 }

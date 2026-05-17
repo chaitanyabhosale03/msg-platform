@@ -24,9 +24,9 @@ impl RatchetState {
     /// Encrypt with ChaCha20-Poly1305
     pub fn encrypt(&mut self, plaintext: &[u8]) -> anyhow::Result<Vec<u8>> {
         let key = chacha::Key::from_slice(&self.key)
-            .ok_or_else(|| anyhow::anyhow!("Invalid key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid key"))?;
         let nonce = chacha::Nonce::from_slice(&self.nonce)
-            .ok_or_else(|| anyhow::anyhow!("Invalid nonce"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid nonce"))?;
 
         let ciphertext = chacha::seal(plaintext, None, &nonce, &key);
         self.counter += 1;
@@ -36,12 +36,12 @@ impl RatchetState {
     /// Decrypt with ChaCha20-Poly1305
     pub fn decrypt(&mut self, ciphertext: &[u8]) -> anyhow::Result<Vec<u8>> {
         let key = chacha::Key::from_slice(&self.key)
-            .ok_or_else(|| anyhow::anyhow!("Invalid key"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid key"))?;
         let nonce = chacha::Nonce::from_slice(&self.nonce)
-            .ok_or_else(|| anyhow::anyhow!("Invalid nonce"))?
+            .ok_or_else(|| anyhow::anyhow!("Invalid nonce"))?;
 
         let plaintext = chacha::open(ciphertext, None, &nonce, &key)
-            .map_err(|_| anyhow::anyhow!("Decryption failed"))?
+            .map_err(|_| anyhow::anyhow!("Decryption failed"))?;
         self.counter += 1;
         Ok(plaintext)
     }
